@@ -53,6 +53,9 @@ class AuthService {
       token,
     };
   }
+  async getCurrentUser(userId) {
+    return await User.findById(userId);
+  }
 }
 
 module.exports = new AuthService();
