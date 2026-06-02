@@ -1,19 +1,17 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema(
+const adminSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
       required: true,
       trim: true,
     },
-
     lastName: {
       type: String,
       required: true,
       trim: true,
     },
-
     email: {
       type: String,
       required: true,
@@ -21,33 +19,33 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-
     passwordHash: {
       type: String,
       required: true,
       select: false,
     },
-
     phone: {
       type: String,
       default: null,
     },
-
     role: {
       type: String,
-      enum: ["customer", "chef", "admin"],
-      default: "customer",
+      default: "admin",
     },
-
     status: {
       type: String,
       enum: ["active", "inactive", "blocked"],
       default: "active",
     },
+    permissions: [
+      {
+        type: String,
+      },
+    ],
   },
   {
     timestamps: true,
   },
 );
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("Admin", adminSchema);

@@ -1,39 +1,55 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const { getModelByRole } = require("../utils/modelResolver");
+const ApiError = require("../utils/ApiError");
+const asyncHandler = require("../utils/asyncHandler");
 
-const authMiddleware = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
+const authMiddleware = asyncHandler(async (req, res, next) => {
+  let token;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
-    }
-
-    const token = authHeader.split(" ")[1];
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    const user = await User.findById(decoded.userId);
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    req.user = user;
-
-    next();
-  } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid token",
-    });
+  // 1. Extract token
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer ")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
   }
-};
+
+  if (!token) {
+    throw new ApiError(401, "Not authorized, token missing");
+  }
+
+  // 2. Verify token
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  /**
+   * Support both possible token styles:
+   * - { userId, role }
+   * - { _id, role }
+   */
+  const userId = decoded.userId || decoded._id;
+  const role = decoded.role;
+
+  if (!userId || !role) {
+    throw new ApiError(401, "Invalid token payload");
+  }
+
+  // 3. Get correct model from role
+  const Model = getModelByRole(role);
+
+  // 4. Find user
+  const user = await Model.findById(userId);
+
+  if (!user) {
+    throw new ApiError(401, "User no longer exists");
+  }
+
+  // 5. Attach user info to request
+  req.user = user;
+  req.user.role = role; // ensure role is always available
+
+  console.log(`Authenticated user: ${user.email} with role: ${role}`);
+
+  next();
+});
 
 module.exports = authMiddleware;

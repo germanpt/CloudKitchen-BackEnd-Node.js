@@ -3,7 +3,11 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 
+const errorMiddleware = require("./middlewares/error.middleware");
+
+
 const authRoutes = require("./routes/auth.routes");
+const chefRoutes = require("./routes/chef.routes");
 
 const app = express();
 
@@ -30,6 +34,7 @@ app.get("/", (req, res) => {
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/chefs", chefRoutes);
 
 // 404 Handler
 app.use((req, res) => {
@@ -38,5 +43,7 @@ app.use((req, res) => {
     message: "Route not found",
   });
 });
+
+app.use(errorMiddleware);
 
 module.exports = app;

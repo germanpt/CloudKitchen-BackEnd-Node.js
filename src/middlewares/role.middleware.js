@@ -1,6 +1,10 @@
 const authorize = (...roles) => {
+  const normalizedRoles = roles.map(r => r.toLowerCase());
+
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    const userRole = (req.user.role || "").toLowerCase();
+
+    if (!normalizedRoles.includes(userRole)) {
       return res.status(403).json({
         success: false,
         message: "Forbidden",
