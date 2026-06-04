@@ -23,9 +23,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static Files
-app.use("/uploads", express.static("uploads"));
-
 // Logging
 app.use(morgan("dev"));
 

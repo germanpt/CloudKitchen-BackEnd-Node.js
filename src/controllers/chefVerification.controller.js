@@ -2,52 +2,45 @@ const chefVerificationService = require("../services/chefVerification.service");
 const ApiResponse = require("../utils/ApiResponse");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
+const {
+  uploadSingleImage,
+} = require("../utils/cloudinaryUpload");
 
 class ChefVerificationController {
-  /**
-   * Helper to convert relative path to full URL
-   */
-  _getFullUrl = (req, relativePath) => {
-    if (!relativePath) return null;
-    // Replace backslashes with forward slashes for URL consistency
-    const sanitizedPath = relativePath.replace(/\\/g, "/");
-    return `${req.protocol}://${req.get("host")}/${sanitizedPath}`;
-  };
-
-  /**
-   * Helper to format the request object with full URLs
-   */
   _formatRequestResponse = (req, verificationRequest) => {
     const requestObj = verificationRequest.toObject();
     return {
       ...requestObj,
-      nationalIdImage: this._getFullUrl(req, requestObj.nationalIdImage),
-      healthCertificateImage: this._getFullUrl(req, requestObj.healthCertificateImage),
+      nationalIdImage: requestObj.nationalIdImage,
+      healthCertificateImage: requestObj.healthCertificateImage,
     };
   };
 
   submitRequest = asyncHandler(async (req, res) => {
     const chefId = req.user._id;
 
-    if (
-      !req.files ||
-      !req.files.nationalIdImage ||
-      !req.files.healthCertificateImage
-    ) {
+    const nationalIdImageFile = req.files?.nationalIdImage?.[0];
+    const healthCertificateImageFile = req.files?.healthCertificateImage?.[0];
+
+    if (!nationalIdImageFile || !healthCertificateImageFile) {
       throw new ApiError(
         400,
         "Both National ID and Health Certificate images are required"
       );
     }
 
-    // Get relative paths from Multer
-    const nationalIdImagePath = req.files.nationalIdImage[0].path;
-    const healthCertificateImagePath = req.files.healthCertificateImage[0].path;
+    const [nationalIdImageUrl, healthCertificateImageUrl] = await Promise.all([
+      uploadSingleImage(nationalIdImageFile, "cloudkitchen/chef-verifications"),
+      uploadSingleImage(
+        healthCertificateImageFile,
+        "cloudkitchen/chef-verifications"
+      ),
+    ]);
 
     const request = await chefVerificationService.submitVerificationRequest(
       chefId,
-      nationalIdImagePath,
-      healthCertificateImagePath
+      nationalIdImageUrl,
+      healthCertificateImageUrl
     );
 
     res

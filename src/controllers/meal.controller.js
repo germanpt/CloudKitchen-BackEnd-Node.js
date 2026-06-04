@@ -2,42 +2,34 @@ const mealService = require("../services/meal.service");
 const ApiResponse = require("../utils/ApiResponse");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
+const {
+  uploadMultipleImages,
+} = require("../utils/cloudinaryUpload");
 
 class MealController {
-  _getFullUrl = (req, relativePath) => {
-    if (!relativePath) return null;
-    const sanitizedPath = relativePath.replace(/\\/g, "/");
-    return `${req.protocol}://${req.get("host")}/${sanitizedPath}`;
-  };
-
   _formatMealResponse = (req, meal) => {
     const mealObj = meal.toObject ? meal.toObject() : meal;
     return {
       ...mealObj,
-      images: mealObj.images.map((img) => this._getFullUrl(req, img)),
+      images: mealObj.images,
     };
   };
 
   createMeal = asyncHandler(async (req, res) => {
     const chefId = req.user._id;
 
-    if (!req.files || !req.files.mealImages || req.files.mealImages.length === 0) {
-      throw new ApiError(400, "At least one meal image is required");
-    }
-
-    if (req.files.mealImages.length > 3) {
-      throw new ApiError(400, "Maximum 3 images allowed per meal");
-    }
-
-    const imagePaths = req.files.mealImages.map((file) => file.path);
+    const imageUrls = await uploadMultipleImages(
+      req.files?.mealImages,
+      "cloudkitchen/meals"
+    );
 
     const mealData = {
       ...req.body,
-      images: imagePaths,
-      // Parse ingredients if it's a string (from form-data)
-      ingredients: typeof req.body.ingredients === 'string' 
-        ? JSON.parse(req.body.ingredients) 
-        : req.body.ingredients
+      images: imageUrls,
+      ingredients:
+        typeof req.body.ingredients === "string"
+          ? JSON.parse(req.body.ingredients)
+          : req.body.ingredients,
     };
 
     const meal = await mealService.createMeal(chefId, mealData);
@@ -70,10 +62,13 @@ class MealController {
     let updateData = { ...req.body };
 
     if (req.files && req.files.mealImages) {
-      updateData.images = req.files.mealImages.map((file) => file.path);
+      updateData.images = await uploadMultipleImages(
+        req.files.mealImages,
+        "cloudkitchen/meals"
+      );
     }
 
-    if (updateData.ingredients && typeof updateData.ingredients === 'string') {
+    if (updateData.ingredients && typeof updateData.ingredients === "string") {
       updateData.ingredients = JSON.parse(updateData.ingredients);
     }
 
