@@ -1,5 +1,6 @@
 const express = require("express");
 const chefController = require("../controllers/chef.controller");
+const brandingController = require("../controllers/branding.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 const authorize = require("../middlewares/role.middleware");
 const validateRequest = require("../middlewares/validate.middleware");
@@ -19,6 +20,13 @@ router.put(
   authMiddleware,
   authorize(ROLES.CHEF),
   chefController.updateProfile
+);
+
+router.post(
+  "/kitchen-branding",
+  authMiddleware,
+  authorize(ROLES.CHEF),
+  brandingController.generateKitchenBrandingController
 );
 
 module.exports = router;

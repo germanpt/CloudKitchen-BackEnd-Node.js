@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/germanpt/CloudKitchen-BackEnd-Node.js#readme",
   "dependencies": {
+    "@huggingface/inference": "^4.13.18",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",
     "cors": "^2.8.6",
