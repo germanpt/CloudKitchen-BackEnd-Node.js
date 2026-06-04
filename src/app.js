@@ -9,6 +9,7 @@ const errorMiddleware = require("./middlewares/error.middleware");
 const authRoutes = require("./routes/auth.routes");
 const chefRoutes = require("./routes/chef.routes");
 const verificationRoutes = require("./routes/chefVerification.routes");
+const mealRoutes = require("./routes/meal.routes");
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/chefs", chefRoutes);
 app.use("/api/verification-request", verificationRoutes);
+app.use("/api/meals", mealRoutes);
 
 // 404 Handler
 app.use((req, res) => {

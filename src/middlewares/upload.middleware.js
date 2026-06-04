@@ -4,7 +4,7 @@ const fs = require("fs");
 const ApiError = require("../utils/ApiError");
 
 // Ensure upload directories exist
-const uploadDirs = ["uploads/chef-verifications"];
+const uploadDirs = ["uploads/chef-verifications", "uploads/meals"];
 uploadDirs.forEach((dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -15,6 +15,8 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     if (file.fieldname === "nationalIdImage" || file.fieldname === "healthCertificateImage") {
       cb(null, "uploads/chef-verifications/");
+    } else if (file.fieldname === "mealImages") {
+      cb(null, "uploads/meals/");
     } else {
       cb(null, "uploads/");
     }
