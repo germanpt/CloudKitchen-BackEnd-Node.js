@@ -8,6 +8,7 @@ const errorMiddleware = require("./middlewares/error.middleware");
 
 const authRoutes = require("./routes/auth.routes");
 const chefRoutes = require("./routes/chef.routes");
+const verificationRoutes = require("./routes/chefVerification.routes");
 
 const app = express();
 
@@ -20,6 +21,9 @@ app.use(cors());
 // Body Parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Static Files
+app.use("/uploads", express.static("uploads"));
 
 // Logging
 app.use(morgan("dev"));
@@ -35,6 +39,7 @@ app.get("/", (req, res) => {
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/chefs", chefRoutes);
+app.use("/api/verification-request", verificationRoutes);
 
 // 404 Handler
 app.use((req, res) => {
