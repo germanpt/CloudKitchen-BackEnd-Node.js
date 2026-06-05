@@ -14,6 +14,10 @@ class CategoryService {
     return await Category.find(query);
   }
 
+  async getActiveCategories() {
+    return await Category.find({ status: "active" });
+  }
+
   async getCategoryById(id) {
     const category = await Category.findById(id);
     if (!category) {

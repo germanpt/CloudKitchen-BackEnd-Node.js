@@ -36,6 +36,12 @@ class ChefVerificationService {
     return request;
   }
 
+  async getPendingRequests() {
+    return await ChefVerificationRequest.find({
+      status: VERIFICATION_STATUS.PENDING,
+    }).populate("chefId", "firstName lastName kitchenName email phone");
+  }
+
   async getVerificationStatus(chefId) {
     const request = await ChefVerificationRequest.findOne({ chefId });
     
