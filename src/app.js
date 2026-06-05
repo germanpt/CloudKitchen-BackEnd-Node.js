@@ -10,6 +10,7 @@ const authRoutes = require("./routes/auth.routes");
 const chefRoutes = require("./routes/chef.routes");
 const verificationRoutes = require("./routes/chefVerification.routes");
 const mealRoutes = require("./routes/meal.routes");
+const categoryRoutes = require("./routes/category.routes");
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/chefs", chefRoutes);
 app.use("/api/verification-request", verificationRoutes);
 app.use("/api/meals", mealRoutes);
+app.use("/api/categories", categoryRoutes);
 
 // 404 Handler
 app.use((req, res) => {
