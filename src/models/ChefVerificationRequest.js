@@ -13,8 +13,16 @@ const chefVerificationRequestSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    nationalIdBackImage: {
+      type: String,
+      required: true,
+    },
     healthCertificateImage: {
       type: String,
+      required: true,
+    },
+    kitchenImages: {
+      type: [String],
       required: true,
     },
     status: {

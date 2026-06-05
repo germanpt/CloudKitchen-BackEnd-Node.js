@@ -37,8 +37,8 @@ const uploadMultipleImages = async (files, folder) => {
     throw new ApiError(400, "At least one image file is required");
   }
 
-  if (files.length > 3) {
-    throw new ApiError(400, "Maximum 3 images allowed");
+  if (files.length > 5) {
+    throw new ApiError(400, "Maximum 5 images allowed");
   }
 
   return Promise.all(files.map((file) => uploadSingleImage(file, folder)));

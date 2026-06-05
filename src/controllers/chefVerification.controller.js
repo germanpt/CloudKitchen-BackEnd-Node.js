@@ -4,6 +4,7 @@ const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
 const {
   uploadSingleImage,
+  uploadMultipleImages,
 } = require("../utils/cloudinaryUpload");
 
 class ChefVerificationController {
@@ -12,7 +13,9 @@ class ChefVerificationController {
     return {
       ...requestObj,
       nationalIdImage: requestObj.nationalIdImage,
+      nationalIdBackImage: requestObj.nationalIdBackImage,
       healthCertificateImage: requestObj.healthCertificateImage,
+      kitchenImages: requestObj.kitchenImages,
     };
   };
 
@@ -20,27 +23,48 @@ class ChefVerificationController {
     const chefId = req.user._id;
 
     const nationalIdImageFile = req.files?.nationalIdImage?.[0];
+    const nationalIdBackImageFile = req.files?.nationalIdBackImage?.[0];
     const healthCertificateImageFile = req.files?.healthCertificateImage?.[0];
+    const kitchenImageFiles = req.files?.kitchenImages;
 
-    if (!nationalIdImageFile || !healthCertificateImageFile) {
+    if (
+      !nationalIdImageFile ||
+      !nationalIdBackImageFile ||
+      !healthCertificateImageFile ||
+      !kitchenImageFiles ||
+      kitchenImageFiles.length < 3 ||
+      kitchenImageFiles.length > 5
+    ) {
       throw new ApiError(
         400,
-        "Both National ID and Health Certificate images are required"
+        "National ID (front & back), Health Certificate, and 3-5 kitchen images are required"
       );
     }
 
-    const [nationalIdImageUrl, healthCertificateImageUrl] = await Promise.all([
+    const [
+      nationalIdImageUrl,
+      nationalIdBackImageUrl,
+      healthCertificateImageUrl,
+      kitchenImageUrls,
+    ] = await Promise.all([
       uploadSingleImage(nationalIdImageFile, "cloudkitchen/chef-verifications"),
+      uploadSingleImage(
+        nationalIdBackImageFile,
+        "cloudkitchen/chef-verifications"
+      ),
       uploadSingleImage(
         healthCertificateImageFile,
         "cloudkitchen/chef-verifications"
       ),
+      uploadMultipleImages(kitchenImageFiles, "cloudkitchen/chef-verifications"),
     ]);
 
     const request = await chefVerificationService.submitVerificationRequest(
       chefId,
       nationalIdImageUrl,
-      healthCertificateImageUrl
+      nationalIdBackImageUrl,
+      healthCertificateImageUrl,
+      kitchenImageUrls
     );
 
     res

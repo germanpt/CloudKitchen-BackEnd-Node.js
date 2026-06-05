@@ -13,7 +13,9 @@ router.post(
   authorize(ROLES.CHEF),
   upload.fields([
     { name: "nationalIdImage", maxCount: 1 },
+    { name: "nationalIdBackImage", maxCount: 1 },
     { name: "healthCertificateImage", maxCount: 1 },
+    { name: "kitchenImages", maxCount: 5 },
   ]),
   chefVerificationController.submitRequest
 );

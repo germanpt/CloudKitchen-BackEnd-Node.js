@@ -3,14 +3,22 @@ const ApiError = require("../utils/ApiError");
 const VERIFICATION_STATUS = require("../constants/verificationStatus");
 
 class ChefVerificationService {
-  async submitVerificationRequest(chefId, nationalIdImageUrl, healthCertificateImageUrl) {
+  async submitVerificationRequest(
+    chefId,
+    nationalIdImageUrl,
+    nationalIdBackImageUrl,
+    healthCertificateImageUrl,
+    kitchenImageUrls
+  ) {
     // Find existing request
     let request = await ChefVerificationRequest.findOne({ chefId });
 
     if (request) {
       // Update existing request and reset status to pending
       request.nationalIdImage = nationalIdImageUrl;
+      request.nationalIdBackImage = nationalIdBackImageUrl;
       request.healthCertificateImage = healthCertificateImageUrl;
+      request.kitchenImages = kitchenImageUrls;
       request.status = VERIFICATION_STATUS.PENDING;
       await request.save();
     } else {
@@ -18,7 +26,9 @@ class ChefVerificationService {
       request = await ChefVerificationRequest.create({
         chefId,
         nationalIdImage: nationalIdImageUrl,
+        nationalIdBackImage: nationalIdBackImageUrl,
         healthCertificateImage: healthCertificateImageUrl,
+        kitchenImages: kitchenImageUrls,
         status: VERIFICATION_STATUS.PENDING,
       });
     }
