@@ -34,4 +34,11 @@ router.patch(
   chefVerificationController.updateStatus
 );
 
+router.get(
+  "/pending",
+  authMiddleware,
+  authorize(ROLES.ADMIN),
+  chefVerificationController.getPendingRequests
+);
+
 module.exports = router;

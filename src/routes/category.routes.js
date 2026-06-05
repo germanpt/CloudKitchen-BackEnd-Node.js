@@ -8,13 +8,14 @@ const ROLES = require("../constants/roles");
 
 const router = express.Router();
 
-// Publicly accessible route to get all categories
-router.get("/", categoryController.getAllCategories);
+// Publicly accessible route to get active categories
+router.get("/active", categoryController.getActiveCategories);
 
 // Protected routes for Admin only
 router.use(authMiddleware);
 router.use(authorize(ROLES.ADMIN));
 
+router.get("/", categoryController.getAllCategories);
 router.post(
   "/",
   upload.single("image"),

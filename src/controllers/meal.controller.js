@@ -30,6 +30,10 @@ class MealController {
         typeof req.body.ingredients === "string"
           ? JSON.parse(req.body.ingredients)
           : req.body.ingredients,
+      categories:
+        typeof req.body.categories === "string"
+          ? JSON.parse(req.body.categories)
+          : req.body.categories,
     };
 
     const meal = await mealService.createMeal(chefId, mealData);
@@ -46,6 +50,28 @@ class MealController {
     res.status(200).json(
       new ApiResponse(200, formattedMeals, "Meals retrieved successfully")
     );
+  });
+
+  getActiveMeals = asyncHandler(async (req, res) => {
+    const { categories } = req.query;
+    let categoryIds = [];
+
+    if (categories) {
+      categoryIds = Array.isArray(categories)
+        ? categories
+        : categories.split(",");
+    }
+
+    const meals = await mealService.getActiveMeals(categoryIds);
+    const formattedMeals = meals.map((meal) =>
+      this._formatMealResponse(req, meal)
+    );
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, formattedMeals, "Active meals retrieved successfully")
+      );
   });
 
   getMealById = asyncHandler(async (req, res) => {
@@ -70,6 +96,10 @@ class MealController {
 
     if (updateData.ingredients && typeof updateData.ingredients === "string") {
       updateData.ingredients = JSON.parse(updateData.ingredients);
+    }
+
+    if (updateData.categories && typeof updateData.categories === "string") {
+      updateData.categories = JSON.parse(updateData.categories);
     }
 
     const meal = await mealService.updateMeal(mealId, chefId, updateData);

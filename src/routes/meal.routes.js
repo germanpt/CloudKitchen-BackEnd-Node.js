@@ -11,6 +11,7 @@ const router = express.Router();
 
 // Public routes
 router.get("/", mealController.getAllMeals);
+router.get("/active", mealController.getActiveMeals);
 router.get("/:id", mealController.getMealById);
 
 // Protected routes (Chef only)
@@ -19,7 +20,7 @@ router.post(
   authMiddleware,
   authorize(ROLES.CHEF),
   upload.fields([{ name: "mealImages", maxCount: 3 }]),
-  validateRequest(["name", "description", "price", "category"]),
+  validateRequest(["name", "description", "price", "categories"]),
   mealController.createMeal
 );
 

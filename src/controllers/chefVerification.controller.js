@@ -78,6 +78,23 @@ class ChefVerificationController {
       );
   });
 
+  getPendingRequests = asyncHandler(async (req, res) => {
+    const requests = await chefVerificationService.getPendingRequests();
+    const formattedRequests = requests.map((reqObj) =>
+      this._formatRequestResponse(req, reqObj)
+    );
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          formattedRequests,
+          "Pending verification requests retrieved successfully"
+        )
+      );
+  });
+
   getStatus = asyncHandler(async (req, res) => {
     const chefId = req.user._id;
     const request = await chefVerificationService.getVerificationStatus(chefId);

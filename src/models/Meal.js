@@ -33,10 +33,12 @@ const mealSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
-    category: {
-      type: String, // Or ObjectId if referencing Category model, using String for now as per prompt
-      required: true,
-    },
+    categories: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Category",
+      },
+    ],
     ingredients: {
       type: [String],
       default: [],

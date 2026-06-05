@@ -11,6 +11,10 @@ class MealService {
     return await mealRepository.findAll(filter);
   }
 
+  async getActiveMeals(categoryIds = []) {
+    return await mealRepository.findActiveWithRanking(categoryIds);
+  }
+
   async getMealById(id) {
     const meal = await mealRepository.findById(id);
     if (!meal) {
