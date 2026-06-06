@@ -22,6 +22,9 @@ router.put(
   chefController.updateProfile
 );
 
+router.get("/", chefController.getAllChefs);
+router.get("/:id", chefController.getChefDetails);
+
 router.post(
   "/kitchen-branding",
   authMiddleware,
