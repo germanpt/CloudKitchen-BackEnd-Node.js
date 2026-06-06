@@ -36,6 +36,20 @@ class ChefService {
 
     return chef;
   }
+
+  async getChefById(chefId) {
+    const chef = await chefRepository.findById(chefId);
+
+    if (!chef) {
+      throw new ApiError(404, "Chef not found");
+    }
+
+    return chef;
+  }
+
+  async getAllChefs() {
+    return await chefRepository.findAll();
+  }
 }
 
 module.exports = new ChefService();

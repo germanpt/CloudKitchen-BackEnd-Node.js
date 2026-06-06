@@ -1,13 +1,13 @@
 # Cloud Kitchen API Documentation
 
-Welcome to the Cloud Kitchen Backend API documentation. This project provides a comprehensive set of APIs for managing chefs, customers, meals, orders, and AI-powered branding.
+Welcome to the Cloud Kitchen Backend API documentation. This project provides a comprehensive set of APIs for managing chefs, customers, meals, categories, and AI-powered kitchen branding.
 
 ## Base URL
 `http://localhost:3000/api`
 
 ---
 
-## 1. Authentication Module
+## 1. Authentication Module (`/auth`)
 Handles user registration, login, and session retrieval.
 
 ### Register User
@@ -18,10 +18,11 @@ Create a new account (Chef, Customer, or Admin).
 - **Auth Required:** No
 - **Mandatory Fields:** `email`, `password`, `role`, `firstName`, `lastName`
 - **Optional Fields:** `phone`
+- **Roles:** `customer`, `chef`, `admin`
 - **Request Body Example:**
 ```json
 {
-  "email": "chef@example.com",
+  "email": "user@example.com",
   "password": "password123",
   "role": "chef",
   "firstName": "John",
@@ -34,7 +35,10 @@ Create a new account (Chef, Customer, or Admin).
 {
   "success": true,
   "statusCode": 201,
-  "data": { "user": { ... }, "token": "..." },
+  "data": {
+    "user": { ... },
+    "token": "..."
+  },
   "message": "User registered successfully"
 }
 ```
@@ -49,7 +53,7 @@ Authenticate and receive a JWT token.
 - **Request Body Example:**
 ```json
 {
-  "email": "chef@example.com",
+  "email": "user@example.com",
   "password": "password123",
   "role": "chef"
 }
@@ -59,8 +63,11 @@ Authenticate and receive a JWT token.
 {
   "success": true,
   "statusCode": 200,
-  "data": { "user": { ... }, "token": "..." },
-  "message": "Logged in successfully"
+  "data": {
+    "user": { ... },
+    "token": "..."
+  },
+  "message": "Login successful"
 }
 ```
 
@@ -76,14 +83,66 @@ Retrieve profile of the authenticated user.
   "success": true,
   "statusCode": 200,
   "data": { ... },
-  "message": "User retrieved successfully"
+  "message": "Current user retrieved successfully"
 }
 ```
 
 ---
 
-## 2. Chef Profile Module
-Manage chef-specific details and branding.
+## 2. Chef Module (`/chefs`)
+Manage chef-specific details, profile updates, and branding.
+
+### Get All Chefs
+Retrieve all registered chefs.
+
+- **URL:** `/chefs`
+- **Method:** `GET`
+- **Auth Required:** No
+- **Success Response:**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "data": [
+    {
+      "_id": "...",
+      "firstName": "John",
+      "lastName": "Doe",
+      "kitchenName": "Mario's Italian Kitchen",
+      "isVerified": true
+    },
+    ...
+  ],
+  "message": "All chefs retrieved successfully"
+}
+```
+
+### Get Chef Details
+Retrieve details of a specific chef.
+
+- **URL:** `/chefs/:id`
+- **Method:** `GET`
+- **Auth Required:** No
+- **Success Response:**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "data": {
+    "_id": "...",
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "chef@example.com",
+    "phone": "01234567890",
+    "kitchenName": "Mario's Italian Kitchen",
+    "slogan": "The taste of Rome",
+    "description": "Authentic homemade pasta and sauces.",
+    "isVerified": true,
+    "status": "active"
+  },
+  "message": "Chef details retrieved successfully"
+}
+```
 
 ### Update Profile
 Update chef's kitchen details and personal info.
@@ -91,13 +150,38 @@ Update chef's kitchen details and personal info.
 - **URL:** `/chefs/profile`
 - **Method:** `PUT`
 - **Auth Required:** Yes (Chef role)
-- **Optional Fields:** `firstName`, `lastName`, `phone`, `kitchenName`, `slogan`, `description`
+- **Optional Fields:** `firstName`, `lastName`, `phone`, `kitchenName`, `slogan`, `description`, `password`
 - **Request Body Example:**
 ```json
 {
   "kitchenName": "Mario's Italian Kitchen",
   "slogan": "The taste of Rome",
   "description": "Authentic homemade pasta and sauces."
+}
+```
+- **Success Response:**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "data": { ... },
+  "message": "Chef profile updated successfully"
+}
+```
+
+### Toggle Verification (Admin Only)
+Toggle the verification status of a chef.
+
+- **URL:** `/chefs/:id/toggle-verification`
+- **Method:** `PATCH`
+- **Auth Required:** Yes (Admin role)
+- **Success Response:**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "data": { ... },
+  "message": "Chef verification status toggled to true"
 }
 ```
 
@@ -122,29 +206,32 @@ Get AI-generated suggestions for kitchen name, slogan, and description.
   "success": true,
   "statusCode": 200,
   "data": {
-    "kitchenNames": "...",
-    "slogans": "...",
+    "kitchenNames": ["...", "..."],
+    "slogans": ["...", "..."],
     "description": "..."
-  }
+  },
+  "message": "Kitchen branding generated successfully"
 }
 ```
 
 ---
 
-## 3. Chef Verification Module
+## 3. Chef Verification Module (`/verification-request`)
 Submit and manage identity verification documents.
 
 ### Submit Verification Request
-Upload documents for admin review. Uses local storage.
+Upload documents for admin review. Uses Cloudinary for storage.
 
 - **URL:** `/verification-request`
 - **Method:** `POST`
 - **Auth Required:** Yes (Chef role)
 - **Body Type:** `multipart/form-data`
 - **Mandatory Files:** 
-  - `nationalIdImage` (1 file)
-  - `healthCertificateImage` (1 file)
-- **Success Response:** Returns relative paths to stored files and `pending` status.
+  - `nationalIdImage` (1 front image)
+  - `nationalIdBackImage` (1 back image)
+  - `healthCertificateImage` (1 image)
+  - `kitchenImages` (3 to 5 images)
+- **Success Response:** Returns the request details with Cloudinary URLs and `pending` status.
 
 ### Get Verification Status
 Check the status of your verification request.
@@ -156,16 +243,36 @@ Check the status of your verification request.
 ```json
 {
   "success": true,
+  "statusCode": 200,
   "data": {
     "status": "pending",
-    "nationalIdImage": "http://localhost:3000/uploads/chef-verifications/...",
-    "healthCertificateImage": "http://localhost:3000/uploads/chef-verifications/..."
-  }
+    "nationalIdImage": "https://res.cloudinary.com/...",
+    "nationalIdBackImage": "https://res.cloudinary.com/...",
+    "healthCertificateImage": "https://res.cloudinary.com/...",
+    "kitchenImages": ["...", "..."]
+  },
+  "message": "Verification status retrieved successfully"
+}
+```
+
+### Get Pending Requests (Admin Only)
+Retrieve all pending verification requests for review.
+
+- **URL:** `/verification-request/pending`
+- **Method:** `GET`
+- **Auth Required:** Yes (Admin role)
+- **Success Response:**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "data": [ ... ],
+  "message": "Pending verification requests retrieved successfully"
 }
 ```
 
 ### Update Status (Admin Only)
-Admin can approve or fail a verification request.
+Approve or fail a verification request.
 
 - **URL:** `/verification-request/:id/status`
 - **Method:** `PATCH`
@@ -178,15 +285,24 @@ Admin can approve or fail a verification request.
 
 ---
 
-## 4. Meals Module
+## 4. Meals Module (`/meals`)
 Full CRUD for managing kitchen meals.
 
 ### Get All Meals
-Retrieve all active meals (supports filtering via query params).
+Retrieve all meals (supports filtering via query params).
 
 - **URL:** `/meals`
 - **Method:** `GET`
 - **Auth Required:** No
+- **Query Params (Optional):** `chefId`, `categories`, `minPrice`, `maxPrice`
+
+### Get Active Meals
+Retrieve all active meals, optionally filtered by categories.
+
+- **URL:** `/meals/active`
+- **Method:** `GET`
+- **Auth Required:** No
+- **Query Params (Optional):** `categories` (comma-separated IDs)
 
 ### Get Meal By ID
 Retrieve details of a specific meal.
@@ -202,9 +318,24 @@ Add a new meal to the kitchen.
 - **Method:** `POST`
 - **Auth Required:** Yes (Chef role)
 - **Body Type:** `multipart/form-data`
-- **Mandatory Fields:** `name`, `description`, `price`, `category`, `mealImages` (1-3 files)
-- **Optional Fields:** `ingredients` (JSON Array string)
-- **Success Response:** Returns meal details with full image URLs.
+- **Mandatory Fields:** `name`, `description`, `price`, `categories`, `mealImages` (1-3 files)
+- **Optional Fields:** `ingredients` (JSON Array or stringified JSON)
+- **Request Body Example (Multipart):**
+  - `name`: "Spaghetti Carbonara"
+  - `description`: "Classic Italian pasta"
+  - `price`: 15.99
+  - `categories`: `["categoryId1", "categoryId2"]`
+  - `ingredients`: `["pasta", "eggs", "pecorino"]`
+  - `mealImages`: (Files)
+- **Success Response:**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "data": { ... },
+  "message": "Meal created successfully"
+}
+```
 
 ### Update Meal
 Update an existing meal.
@@ -232,6 +363,74 @@ Toggle meal visibility.
 
 ---
 
+## 5. Categories Module (`/categories`)
+Manage meal categories (Admin Only for modifications).
+
+### Get Active Categories
+Retrieve all active categories for public browsing.
+
+- **URL:** `/categories/active`
+- **Method:** `GET`
+- **Auth Required:** No
+
+### Get All Categories (Admin Only)
+Retrieve all categories (active and inactive).
+
+- **URL:** `/categories`
+- **Method:** `GET`
+- **Auth Required:** Yes (Admin role)
+
+### Get Category By ID (Admin Only)
+Retrieve a specific category.
+
+- **URL:** `/categories/:id`
+- **Method:** `GET`
+- **Auth Required:** Yes (Admin role)
+
+### Create Category (Admin Only)
+Add a new category.
+
+- **URL:** `/categories`
+- **Method:** `POST`
+- **Auth Required:** Yes (Admin role)
+- **Body Type:** `multipart/form-data`
+- **Mandatory Fields:** `name`, `image` (1 file)
+- **Success Response:**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "data": { ... },
+  "message": "Category created successfully"
+}
+```
+
+### Update Category (Admin Only)
+Update an existing category.
+
+- **URL:** `/categories/:id`
+- **Method:** `PATCH`
+- **Auth Required:** Yes (Admin role)
+- **Body Type:** `multipart/form-data`
+- **Optional Fields:** `name`, `image`
+
+### Delete Category (Admin Only)
+Remove a category.
+
+- **URL:** `/categories/:id`
+- **Method:** `DELETE`
+- **Auth Required:** Yes (Admin role)
+
+### Update Category Status (Admin Only)
+Change visibility of a category.
+
+- **URL:** `/categories/:id/status`
+- **Method:** `PATCH`
+- **Auth Required:** Yes (Admin role)
+- **Mandatory Fields:** `status` (`active`, `inactive`)
+
+---
+
 ## Common Error Responses
 
 ### 400 Bad Request
@@ -239,8 +438,9 @@ Missing fields or validation error.
 ```json
 {
   "success": false,
+  "statusCode": 400,
   "message": "Missing required fields",
-  "missingFields": ["email"]
+  "errors": [...]
 }
 ```
 
@@ -249,6 +449,7 @@ Invalid or missing token.
 ```json
 {
   "success": false,
+  "statusCode": 401,
   "message": "Not authorized, token missing"
 }
 ```
@@ -258,7 +459,8 @@ Role mismatch or ownership violation.
 ```json
 {
   "success": false,
-  "message": "You are not authorized to update this meal"
+  "statusCode": 403,
+  "message": "Access denied"
 }
 ```
 
@@ -267,6 +469,17 @@ Resource does not exist.
 ```json
 {
   "success": false,
-  "message": "Meal not found"
+  "statusCode": 404,
+  "message": "Resource not found"
+}
+```
+
+### 500 Internal Server Error
+Unexpected server error.
+```json
+{
+  "success": false,
+  "statusCode": 500,
+  "message": "Something went wrong"
 }
 ```

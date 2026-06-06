@@ -25,6 +25,23 @@ class ChefController {
       new ApiResponse(200, chef, "Chef profile updated successfully")
     );
   });
+
+  getChefDetails = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const chef = await chefService.getChefById(id);
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, chef, "Chef details retrieved successfully"));
+  });
+
+  getAllChefs = asyncHandler(async (req, res) => {
+    const chefs = await chefService.getAllChefs();
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, chefs, "All chefs retrieved successfully"));
+  });
 }
 
 module.exports = new ChefController();
