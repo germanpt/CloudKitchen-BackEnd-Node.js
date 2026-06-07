@@ -25,7 +25,7 @@ router.post(
 
 router.get("/:id", categoryController.getCategoryById);
 
-router.patch(
+router.put(
   "/:id",
   upload.single("image"),
   categoryController.updateCategory

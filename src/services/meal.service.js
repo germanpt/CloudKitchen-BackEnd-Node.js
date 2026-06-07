@@ -11,8 +11,8 @@ class MealService {
     return await mealRepository.findAll(filter);
   }
 
-  async getActiveMeals(categoryIds = []) {
-    return await mealRepository.findActiveWithRanking(categoryIds);
+  async getActiveMeals(categoryIds = [], search = "") {
+    return await mealRepository.findActiveWithRanking(categoryIds, search);
   }
 
   async getMealById(id) {

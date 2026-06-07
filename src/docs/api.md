@@ -431,6 +431,146 @@ Change visibility of a category.
 
 ---
 
+## 6. Cart Module (`/cart`)
+Manage customer shopping cart.
+
+### Get Current Cart
+Retrieve the items in the customer's cart.
+
+- **URL:** `/cart`
+- **Method:** `GET`
+- **Auth Required:** Yes (Customer role)
+- **Success Response:**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "data": {
+    "_id": "...",
+    "customerId": "...",
+    "items": [
+      {
+        "mealId": {
+          "_id": "...",
+          "name": "...",
+          "price": 10,
+          "chefId": { ... }
+        },
+        "quantity": 2
+      }
+    ]
+  },
+  "message": "Cart retrieved successfully"
+}
+```
+
+### Add Item to Cart
+Add a meal to the cart. If the meal is already in the cart, its quantity is increased.
+
+- **URL:** `/cart/items`
+- **Method:** `POST`
+- **Auth Required:** Yes (Customer role)
+- **Mandatory Fields:** `mealId`
+- **Optional Fields:** `quantity` (Default: 1)
+- **Request Body Example:**
+```json
+{
+  "mealId": "mealId123",
+  "quantity": 2
+}
+```
+
+### Update Item Quantity
+Update the quantity of a meal already in the cart.
+
+- **URL:** `/cart/items/:mealId`
+- **Method:** `PATCH`
+- **Auth Required:** Yes (Customer role)
+- **Mandatory Fields:** `quantity`
+- **Request Body Example:**
+```json
+{
+  "quantity": 5
+}
+```
+
+### Remove Item from Cart
+Remove a specific meal from the cart.
+
+- **URL:** `/cart/items/:mealId`
+- **Method:** `DELETE`
+- **Auth Required:** Yes (Customer role)
+
+### Clear Cart
+Remove all items from the cart.
+
+- **URL:** `/cart`
+- **Method:** `DELETE`
+- **Auth Required:** Yes (Customer role)
+
+---
+
+## 7. Orders Module (`/orders`)
+Manage customer orders and checkout.
+
+### Checkout
+Create an order from the current cart items.
+
+- **URL:** `/orders/checkout`
+- **Method:** `POST`
+- **Auth Required:** Yes (Customer role)
+- **Optional Fields:** `shippingAddress`, `contactPhone` (Uses profile defaults if not provided)
+- **Success Response:**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "data": {
+    "_id": "...",
+    "customerId": "...",
+    "items": [
+      {
+        "mealId": "...",
+        "name": "Spaghetti Carbonara",
+        "chefId": "...",
+        "unitPrice": 15.99,
+        "quantity": 2,
+        "subtotal": 31.98
+      }
+    ],
+    "totalAmount": 31.98,
+    "status": "pending",
+    "shippingAddress": "...",
+    "contactPhone": "..."
+  },
+  "message": "Order placed successfully"
+}
+```
+
+### Get My Orders
+Retrieve all orders for the authenticated customer.
+
+- **URL:** `/orders/my-orders`
+- **Method:** `GET`
+- **Auth Required:** Yes (Customer role)
+
+### Get Order Details
+Retrieve details of a specific order.
+
+- **URL:** `/orders/:id`
+- **Method:** `GET`
+- **Auth Required:** Yes (Relevant Customer, Chef, or Admin)
+
+### Update Order Status
+Change the status of an order.
+
+- **URL:** `/orders/:id/status`
+- **Method:** `PATCH`
+- **Auth Required:** Yes (Chef or Admin role)
+- **Mandatory Fields:** `status` (`pending`, `confirmed`, `preparing`, `out_for_delivery`, `delivered`, `cancelled`)
+
+---
+
 ## Common Error Responses
 
 ### 400 Bad Request

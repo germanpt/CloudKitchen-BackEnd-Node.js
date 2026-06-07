@@ -53,7 +53,7 @@ class MealController {
   });
 
   getActiveMeals = asyncHandler(async (req, res) => {
-    const { categories } = req.query;
+    const { categories, search } = req.query;
     let categoryIds = [];
 
     if (categories) {
@@ -62,7 +62,7 @@ class MealController {
         : categories.split(",");
     }
 
-    const meals = await mealService.getActiveMeals(categoryIds);
+    const meals = await mealService.getActiveMeals(categoryIds, search);
     const formattedMeals = meals.map((meal) =>
       this._formatMealResponse(req, meal)
     );
@@ -70,7 +70,11 @@ class MealController {
     res
       .status(200)
       .json(
-        new ApiResponse(200, formattedMeals, "Active meals retrieved successfully")
+        new ApiResponse(
+          200,
+          formattedMeals,
+          "Active meals retrieved successfully"
+        )
       );
   });
 

@@ -12,25 +12,34 @@ router.patch(
   "/:id/toggle-verification",
   authMiddleware,
   authorize(ROLES.ADMIN),
-  chefController.toggleVerification
+  chefController.toggleVerification,
 );
 
 router.put(
   "/profile",
   authMiddleware,
   authorize(ROLES.CHEF),
-  chefController.updateProfile
+  chefController.updateProfile,
 );
 
-router.get("/", chefController.getAllChefs);
-router.get("/:id", chefController.getChefDetails);
+router.get(
+  "/",
+  authMiddleware,
+  authorize(ROLES.ADMIN),
+  chefController.getAllChefs,
+);
+
+router.get(
+  "/:id",
+  authMiddleware,
+  chefController.getChefDetails,
+);
 
 router.post(
   "/kitchen-branding",
   authMiddleware,
   authorize(ROLES.CHEF),
-  brandingController.generateKitchenBrandingController
+  brandingController.generateKitchenBrandingController,
 );
 
 module.exports = router;
-

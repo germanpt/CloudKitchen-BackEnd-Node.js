@@ -10,18 +10,24 @@ const validateRequest = require("../middlewares/validate.middleware");
 const router = express.Router();
 
 // Public routes
-router.get("/", mealController.getAllMeals);
 router.get("/active", mealController.getActiveMeals);
 router.get("/:id", mealController.getMealById);
 
 // Protected routes (Chef only)
+router.get(
+  "/",
+  authMiddleware,
+  authorize(ROLES.CHEF, ROLES.ADMIN),
+  mealController.getAllMeals,
+);
+
 router.post(
   "/",
   authMiddleware,
   authorize(ROLES.CHEF),
   upload.fields([{ name: "mealImages", maxCount: 3 }]),
   validateRequest(["name", "description", "price", "categories"]),
-  mealController.createMeal
+  mealController.createMeal,
 );
 
 router.put(
@@ -29,21 +35,21 @@ router.put(
   authMiddleware,
   authorize(ROLES.CHEF),
   upload.fields([{ name: "mealImages", maxCount: 3 }]),
-  mealController.updateMeal
+  mealController.updateMeal,
 );
 
 router.delete(
   "/:id",
   authMiddleware,
   authorize(ROLES.CHEF),
-  mealController.deleteMeal
+  mealController.deleteMeal,
 );
 
 router.patch(
   "/:id/status",
   authMiddleware,
   authorize(ROLES.CHEF),
-  mealController.updateStatus
+  mealController.updateStatus,
 );
 
 module.exports = router;
