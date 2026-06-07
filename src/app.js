@@ -11,6 +11,8 @@ const chefRoutes = require("./routes/chef.routes");
 const verificationRoutes = require("./routes/chefVerification.routes");
 const mealRoutes = require("./routes/meal.routes");
 const categoryRoutes = require("./routes/category.routes");
+const cartRoutes = require("./routes/cart.routes");
+const orderRoutes = require("./routes/order.routes");
 
 const app = express();
 
@@ -41,6 +43,8 @@ app.use("/api/chefs", chefRoutes);
 app.use("/api/verification-request", verificationRoutes);
 app.use("/api/meals", mealRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
 
 // 404 Handler
 app.use((req, res) => {
